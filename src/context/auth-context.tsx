@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthResponse, VerificationResponse } from '../types/auth';
 import api from '../lib/axios';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+
 
 interface AuthContextType {
     user: User | null;
@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
-    const navigate = useNavigate();
 
 
     const login = async (email: string, password: string) => {

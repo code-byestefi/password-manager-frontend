@@ -111,7 +111,7 @@ export function Login() {
         {/* Versión móvil de la imagen */}
         <div className="mt-8 text-center md:hidden">
           <img
-            src="/src/assets/safe.png"
+            src="/public/image/login.jpeg"
             alt="Safe"
             className="w-48 h-auto mx-auto opacity-75"
           />

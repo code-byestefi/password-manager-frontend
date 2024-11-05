@@ -1,4 +1,3 @@
-// src/pages/passwords/PasswordList.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Copy, Edit, Trash } from 'lucide-react';
@@ -6,20 +5,29 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '../../lib/axios';
 import { queryClient } from '../../lib/react-query';
 
+const ALL_CATEGORIES = 'all';
+
 interface Password {
   id: number;
   name: string;
   username: string;
   websiteUrl?: string;
+  categoryId?: number;
   categoryName?: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 export function PasswordList() {
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES);
   const navigate = useNavigate();
 
   // Obtener las contraseñas usando React Query
-  const { data: passwords = [], isLoading } = useQuery({
+  const { data: passwords = [], isLoading: isLoadingPasswords } = useQuery({
     queryKey: ['passwords'],
     queryFn: async () => {
       const { data } = await api.get<Password[]>('/passwords');
@@ -27,26 +35,35 @@ export function PasswordList() {
     }
   });
 
-  // Filtrar contraseñas según la búsqueda
-  const filteredPasswords = passwords.filter(password => 
-    password.name.toLowerCase().includes(search.toLowerCase()) ||
-    password.username.toLowerCase().includes(search.toLowerCase())
-  );
+  // Obtener categorías
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data } = await api.get<Category[]>('/categories');
+      return data;
+    }
+  });
 
+  // Filtrar contraseñas según la búsqueda y categoría
+  const filteredPasswords = passwords.filter(password => {
+    const matchesSearch = 
+      password.name.toLowerCase().includes(search.toLowerCase()) ||
+      password.username.toLowerCase().includes(search.toLowerCase());
+      
+    const matchesCategory = 
+      selectedCategory === ALL_CATEGORIES || 
+      password.categoryId === parseInt(selectedCategory);
+
+    return matchesSearch && matchesCategory;
+  });
 
   const copyPassword = async (id: number) => {
     try {
-      // Obtener la contraseña desencriptada
       const { data } = await api.get<string>(`/passwords/${id}/decrypt`);
-      
-      // Copiar al portapapeles
       await navigator.clipboard.writeText(data);
-      
-      // TODO: Mostrar notificación de éxito
       alert('Contraseña copiada al portapapeles');
     } catch (err) {
       console.error('Error al copiar la contraseña:', err);
-      // TODO: Mostrar notificación de error
       alert('Error al copiar la contraseña');
     }
   };
@@ -56,11 +73,9 @@ export function PasswordList() {
       api.delete(`/passwords/${id}`).then(res => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passwords'] });
-      // TODO: Mostrar notificación de éxito
       alert('Contraseña eliminada correctamente');
     },
     onError: () => {
-      // TODO: Mostrar notificación de error
       alert('Error al eliminar la contraseña');
     }
   });
@@ -70,6 +85,8 @@ export function PasswordList() {
       deletePassword.mutate(id);
     }
   };
+
+  const isLoading = isLoadingPasswords || isLoadingCategories;
 
   return (
     <div className="space-y-6">
@@ -85,8 +102,9 @@ export function PasswordList() {
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="flex items-center space-x-4">
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Barra de búsqueda */}
         <div className="flex-1 max-w-md">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -101,9 +119,36 @@ export function PasswordList() {
             />
           </div>
         </div>
+
+        {/* Filtro de categorías */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedCategory(ALL_CATEGORIES)}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              selectedCategory === ALL_CATEGORIES
+                ? 'bg-primary-100 text-primary-700'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Todas
+          </button>
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id.toString())}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                selectedCategory === category.id.toString()
+                  ? 'bg-primary-100 text-primary-700'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Password List */}
+      {/* Lista de contraseñas */}
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         {isLoading ? (
           <div className="text-center py-12">
@@ -112,12 +157,16 @@ export function PasswordList() {
         ) : filteredPasswords.length === 0 ? (
           <div className="text-center py-12">
             <h3 className="mt-2 text-sm font-semibold text-gray-900">
-              {search ? 'No se encontraron contraseñas' : 'No hay contraseñas'}
+              {search || selectedCategory !== ALL_CATEGORIES 
+                ? 'No se encontraron contraseñas' 
+                : 'No hay contraseñas'}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {search ? 'Intenta con otra búsqueda.' : 'Comienza creando una nueva contraseña.'}
+              {search || selectedCategory !== ALL_CATEGORIES 
+                ? 'Intenta con otros filtros.' 
+                : 'Comienza creando una nueva contraseña.'}
             </p>
-            {!search && (
+            {!search && selectedCategory === ALL_CATEGORIES && (
               <div className="mt-6">
                 <button
                   onClick={() => navigate('/passwords/new')}
@@ -172,7 +221,9 @@ export function PasswordList() {
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {password.categoryName || '-'}
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      {password.categoryName || 'Sin categoría'}
+                    </span>
                   </td>
                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                     <div className="flex justify-end gap-2">

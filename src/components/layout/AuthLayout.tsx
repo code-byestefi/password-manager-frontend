@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import safeLogo from '../../../public/image/login.jpeg';
 
 export function AuthLayout() {
     return (
@@ -14,7 +15,7 @@ export function AuthLayout() {
               <div className="w-full md:w-1/2 bg-gradient-to-br from-blue-50 to-blue-100 p-8 lg:p-12 hidden md:flex items-center justify-center">
                 <div className="relative w-full max-w-sm">
                   <img
-                    src="/public/image/login.jpeg"
+                    src={safeLogo}
                     alt="Safe"
                     className="w-full h-auto object-contain"
                   />

@@ -1,9 +1,16 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
-  plugins: [react()],
-  define: {
-    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL)
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  // Carga las variables de entorno según el modo (development/production)
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
+    plugins: [react()],
+    define: {
+      // Proporciona las variables de entorno a tu aplicación
+      __API_URL__: JSON.stringify(env.VITE_API_URL)
+    }
   }
 })

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/passwords/NewPassword.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../lib/axios';
 
@@ -24,6 +23,8 @@ export function NewPassword() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   // Estado del formulario
   const [formData, setFormData] = useState<PasswordFormData>({
@@ -44,6 +45,23 @@ export function NewPassword() {
     }
   });
 
+  // Mutation para crear categoría
+  const createCategory = useMutation({
+    mutationFn: async (name: string) => {
+      const { data } = await api.post<Category>('/categories', { name });
+      return data;
+    },
+    onSuccess: (newCategory) => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setFormData(prev => ({ ...prev, categoryId: newCategory.id }));
+      setNewCategoryName('');
+      setShowNewCategoryInput(false);
+    },
+    onError: () => {
+      setError('Error al crear la categoría');
+    }
+  });
+
   // Mutation para crear contraseña
   const createPassword = useMutation({
     mutationFn: (data: PasswordFormData) => 
@@ -61,6 +79,12 @@ export function NewPassword() {
     e.preventDefault();
     setError('');
     createPassword.mutate(formData);
+  };
+
+  const handleAddCategory = () => {
+    if (newCategoryName.trim()) {
+      createCategory.mutate(newCategoryName);
+    }
   };
 
   return (
@@ -151,19 +175,51 @@ export function NewPassword() {
             <label htmlFor="category" className="block text-sm font-medium text-gray-700">
               Categoría
             </label>
-            <select
-              id="category"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
-              value={formData.categoryId || ''}
-              onChange={(e) => setFormData({ ...formData, categoryId: e.target.value ? Number(e.target.value) : undefined })}
-            >
-              <option value="">Sin categoría</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-2">
+              <select
+                id="category"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
+                value={formData.categoryId || ''}
+                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value ? Number(e.target.value) : undefined })}
+              >
+                <option value="">Sin categoría</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowNewCategoryInput(!showNewCategoryInput)}
+                className="mt-1 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Input para nueva categoría */}
+            {showNewCategoryInput && (
+              <div className="mt-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Nombre de la nueva categoría"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    disabled={!newCategoryName.trim()}
+                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                  >
+                    Agregar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Notas */}

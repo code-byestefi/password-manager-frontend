@@ -3,13 +3,13 @@
 ## 🔐 Autenticación y Registro
 
 ### Registro de Usuario
-![Registro](img/register.png)
+![Registro](/img/register.png)
 - Formulario de registro con validación en tiempo real
 - Campos: nombre, email y contraseña
 - Integración con sistema de verificación por email
 
 ### Verificación de Email
-![Verificación](img/verificacion.png)
+![Verificación](/img/verificacion.png)
 - Pantalla de ingreso de código de verificación
 - Opción para reenvío de código
 - Feedback instantáneo de validación

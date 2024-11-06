@@ -1,50 +1,67 @@
-# React + TypeScript + Vite
+# Interfaz de Usuario - Password Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🔐 Autenticación y Registro
 
-Currently, two official plugins are available:
+### Registro de Usuario
+![Registro](img/register.png)
+- Formulario de registro con validación en tiempo real
+- Campos: nombre, email y contraseña
+- Integración con sistema de verificación por email
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Verificación de Email
+![Verificación](img/verificacion.png)
+- Pantalla de ingreso de código de verificación
+- Opción para reenvío de código
+- Feedback instantáneo de validación
 
-## Expanding the ESLint configuration
+### Login
+![Login](img/login.png)
+- Interfaz de inicio de sesión
+- Acceso seguro con JWT
+- Enlace a recuperación de contraseña
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 📝 Gestión de Contraseñas
 
-- Configure the top-level `parserOptions` property like this:
+### Dashboard Principal
+![Dashboard](img/lista.png)
+- Vista general de todas las contraseñas almacenadas
+- Sistema de búsqueda y filtrado
+- Organización por categorías
+- Acciones rápidas: copiar, editar, eliminar
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Nueva Contraseña
+![Nueva Contraseña](img/nuevacontrase.png)
+- Formulario completo para nueva entrada
+- Selector de categorías con opción de crear nueva
+- Generador de contraseñas integrado
+- Campo de notas y URL opcional
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Edición de Contraseña
+- Interfaz de edición con datos precargados
+- Validación de cambios
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### Generador de Contraseñas
+![Generador](img/generador.png)
+- Configuración personalizable de parámetros
+- Indicador de fortaleza
+- Vista previa de contraseña generada
+- Botón de copiado rápido
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## 👤 Perfil de Usuario
+
+### Visualización de Perfil y Edición de Perfil
+![Perfil](img/profile.png)
+- Información del usuario
+- Estadísticas de uso
+- Imagen de perfil personalizable
+- Actualización de datos personales
+- Gestión de imagen de perfil
+- Cambio de contraseña
+
+## 🏷️ Gestión de Categorías
+
+### Categorías
+- Lista de categorías personalizadas
+- Creación y edición de categorías
+- Visualización de contraseñas por categoría
+
